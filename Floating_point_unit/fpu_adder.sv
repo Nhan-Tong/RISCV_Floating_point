@@ -24,7 +24,7 @@ module fpu_adder(
   logic [7:0]  o_e_norm;
   logic [24:0] o_m_norm;
 
-  addition_normaliser norm1
+  fpu_add_normaliser norm1
   (
     .in_e(i_e_norm),
     .in_m(i_m_norm),

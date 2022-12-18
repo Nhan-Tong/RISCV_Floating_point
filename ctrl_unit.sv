@@ -9,7 +9,7 @@ module ctrl_unit (
     output logic [2:0] imm_sel_o,
     output logic br_sel_o,
     output logic br_unsigned_o,
-    output logic rd_wren_o,
+    output logic rf_wren_o,
     output logic op_a_sel_o,
     op_b_sel_o,
     output logic [3:0] alu_op_o,
@@ -42,7 +42,7 @@ module ctrl_unit (
         endcase
 
         imm_sel_o     = 3'b101;  // don't care 
-        rd_wren_o     = 1'b1;  // write to the regfile
+        rf_wren_o     = 1'b1;  // write to the regfile
         op_a_sel_o    = 1'b0;  // choose rs1_data
         op_b_sel_o    = 1'b0;  // choose rs2_data
         mem_wren_o    = 1'b0;  //don't write LSU
@@ -69,7 +69,7 @@ module ctrl_unit (
         endcase
 
         imm_sel_o     = 3'b000;  // choose imm type_I
-        rd_wren_o     = 1'b1;  // write to the regfile
+        rf_wren_o     = 1'b1;  // write to the regfile
         op_a_sel_o    = 1'b0;  // choose rs1_data
         op_b_sel_o    = 1'b1;  // choose imm
         mem_wren_o    = 1'b0;  // don't write LSU
@@ -91,7 +91,7 @@ module ctrl_unit (
         endcase
 
         imm_sel_o     = 3'b000;  // have immediate type_I
-        rd_wren_o     = 1'b1;  //  read data into regfile
+        rf_wren_o     = 1'b1;  //  read data into regfile
         op_a_sel_o    = 1'b0;  // chọn rs1_data
         op_b_sel_o    = 1'b1;  // chọn imm
         alu_op_o      = 4'h0;  // add
@@ -112,7 +112,7 @@ module ctrl_unit (
 
         br_sel_o      = 1'b0;  // pc+4 
         imm_sel_o     = 3'b001;  // have immediate type_S
-        rd_wren_o     = 1'b0;  // don't read data into regfile
+        rf_wren_o     = 1'b0;  // don't read data into regfile
         br_unsigned_o = 1'b0;  // don't care
         op_a_sel_o    = 1'b0;  // chọn rs1_data
         op_b_sel_o    = 1'b1;  // chọn imm
@@ -127,7 +127,7 @@ module ctrl_unit (
         op_b_sel_o    = 1'b1;  // choose imm
         alu_op_o      = 4'h0;  // choose add
         mem_wren_o    = 1'b0;  // don't write to the lsu
-        rd_wren_o     = 1'b0;  // don't enable regfile
+        rf_wren_o     = 1'b0;  // don't enable regfile
         imm_sel_o     = 3'b010;  // type B
         wb_sel_o      = 2'b01;  // don't care
         br_unsigned_o = br_unsignedB;
@@ -139,7 +139,7 @@ module ctrl_unit (
       7'b0010111: begin
         br_sel_o      = 0;  // pc+4 
         imm_sel_o     = 3'b011;  // have immediate type_U
-        rd_wren_o     = 1'b1;  //  read data into regfile
+        rf_wren_o     = 1'b1;  //  read data into regfile
         br_unsigned_o = 1'b0;  // don't care
         op_a_sel_o    = 1'b1;  // chọn pc
         op_b_sel_o    = 1'b1;  // chọn imm
@@ -152,7 +152,7 @@ module ctrl_unit (
       7'b1101111: begin
         br_sel_o      = 1'b1;  // alu_data 
         imm_sel_o     = 3'b100;  // have immediate type_J
-        rd_wren_o     = 1'b1;  //  read data into regfile
+        rf_wren_o     = 1'b1;  //  read data into regfile
         br_unsigned_o = 1'b0;  // don't care
         op_a_sel_o    = 1'b1;  // chọn pc
         op_b_sel_o    = 1'b1;  // chọn imm
@@ -165,7 +165,7 @@ module ctrl_unit (
       7'b1100111: begin
         br_sel_o      = 1'b1;  // alu_data 
         imm_sel_o     = 3'b000;  // have immediate type_I
-        rd_wren_o     = 1'b1;  //  read data into regfile
+        rf_wren_o     = 1'b1;  //  read data into regfile
         br_unsigned_o = 1'b0;  // don't care	
         op_a_sel_o    = 1'b0;  // chọn rs1_data
         op_b_sel_o    = 1'b1;  // chọn imm
@@ -178,7 +178,7 @@ module ctrl_unit (
       7'b0110111: begin
         br_sel_o      = 0;  // pc+4 
         imm_sel_o     = 3'b011;  // have immediate type_U
-        rd_wren_o     = 1'b1;  //  read data into regfile
+        rf_wren_o     = 1'b1;  //  read data into regfile
         br_unsigned_o = 1'b0;  // don't care
         op_a_sel_o    = 1'b0;  // chọn pc
         op_b_sel_o    = 1'b1;  // chọn imm
@@ -191,7 +191,7 @@ module ctrl_unit (
       default: begin
         br_sel_o      = 1'b0;
         imm_sel_o     = 3'b101;
-        rd_wren_o     = 1'b0;
+        rf_wren_o     = 1'b0;
         br_unsigned_o = 1'b0;
         op_a_sel_o    = 1'b0;
         op_b_sel_o    = 1'b0;

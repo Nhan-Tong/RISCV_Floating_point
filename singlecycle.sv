@@ -33,7 +33,7 @@ module singlecycle (
   logic [ 3:0] ls_op; // load store option
   logic        br_sel;
   logic        br_unsigned;
-  logic        rd_wren;
+  logic        rf_wren;
   logic op_a_sel, op_b_sel;
   logic br_less;
   logic br_equal;
@@ -48,7 +48,7 @@ module singlecycle (
       .imm_sel_o    (imm_sel),
       .br_sel_o     (br_sel),
       .br_unsigned_o(br_unsigned),
-      .rd_wren_o    (rd_wren),
+      .rf_wren_o    (rf_wren),
       .op_a_sel_o   (op_a_sel),
       .op_b_sel_o   (op_b_sel),
       .alu_op_o     (alu_op),
@@ -79,7 +79,7 @@ module singlecycle (
       .rs2_addr_i(inst[24:20]),
       .rd_addr_i (inst[11:7]),
       .rd_data_i (wb_data),
-      .rd_wren_i (rd_wren),
+      .rf_wren_i (rf_wren),
       .rs1_data_o(rs1_data),
       .rs2_data_o(rs2_data)
   );
