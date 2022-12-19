@@ -1,5 +1,5 @@
 
-//IEEE 754 Single Precision ALU
+
 module fpu(
 	input logic clk_i,
 	input logic [31:0] op_a_i, op_b_i,

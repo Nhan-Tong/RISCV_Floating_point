@@ -121,8 +121,8 @@ module singlecycle (
       .alu_data_o (alu_data)
   );
 
-  // module lsu-------------------------------------------------------------------------------------------------?
-  load_store_control lsc1 (
+  // module memory control-------------------------------------------------------------------------------------------------?
+  memory_control lsc1 (
       .clk_i    (clk_i),
       .rst_ni   (rst_ni),
       .ls_op_i  (ls_op),

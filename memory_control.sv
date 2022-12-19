@@ -1,4 +1,4 @@
-module load_store_control (
+module memory_control (
 	input  logic        clk_i,
 	input  logic        rst_ni,
 	input  logic [31:0] st_data_i,
