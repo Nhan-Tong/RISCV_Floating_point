@@ -8,7 +8,8 @@ module data_mem #(
     input  logic [      31:0] pwdata_i,
     input  logic [       3:0] pstrb_i,
     output logic [      31:0] prdata_o,
-
+    output logic   pready_o,
+    output logic   pslverr_o,
     /* verilator lint_off UNUSED */
     input logic clk_i,
     input logic rst_ni
@@ -29,26 +30,36 @@ module data_mem #(
   end
 
 
-  always_ff @(posedge clk_i) begin : proc_data
-    if (psel_i && penable_i && pwrite_i) begin
-
-      if (pstrb_i[0]) begin
-        dmem[paddr_i[DMEM_W-1:2]][0] <= pwdata_i[7:0];
-      end
-      if (pstrb_i[1]) begin
-        dmem[paddr_i[DMEM_W-1:2]][1] <= pwdata_i[15:8];
-      end
-      if (pstrb_i[2]) begin
-        dmem[paddr_i[DMEM_W-1:2]][2] <= pwdata_i[23:16];
-      end
-      if (pstrb_i[3]) begin
-        dmem[paddr_i[DMEM_W-1:2]][3] <= pwdata_i[31:24];
+  always_ff @(posedge clk_i or negedge rst_ni ) begin : proc_data
+    if(!rst_ni) begin
+      pslverr_o <= 0;
+      pready_o <= 1;
+    end
+    else if (psel_i && penable_i && pwrite_i) begin
+      if(paddr_i <= 2**(DMEM_W-2)-1) begin
+        pready_o <= 1;
+        pslverr_o <= 0;
+        if (pstrb_i[0]) begin
+          dmem[paddr_i[DMEM_W-1:2]][0] <= pwdata_i[7:0];
+        end
+        if (pstrb_i[1]) begin
+          dmem[paddr_i[DMEM_W-1:2]][1] <= pwdata_i[15:8];
+        end
+        if (pstrb_i[2]) begin
+          dmem[paddr_i[DMEM_W-1:2]][2] <= pwdata_i[23:16];
+        end
+        if (pstrb_i[3]) begin
+          dmem[paddr_i[DMEM_W-1:2]][3] <= pwdata_i[31:24];
+        end else begin
+          pready_o <= 0;
+          pslverr_o <= 1;
+        end
       end
     end
     $writememh("./memory/data_mem.mem", dmem);
   end
 
-  assign prdata_o = dmem[paddr_i[DMEM_W-1:2]];
+  assign prdata_o = (pready_o & !pslverr_o)? dmem[paddr_i[DMEM_W-1:2]] : 0;
 
 
 endmodule

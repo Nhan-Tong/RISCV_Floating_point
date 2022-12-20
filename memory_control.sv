@@ -30,6 +30,10 @@ module memory_control (
 	logic [31:0] omem_data [0:10];
 	logic [3:0]  addr_sel;
 	logic        omem_en, dmem_en;
+	/* verilator lint_off UNUSED */
+    logic pslverr, pready;
+    /* verilator lint_on UNUSED */
+	
 
 	assign addr_sel = addr_i[11:8];
 	assign ls_instruction = ls_op_i;
@@ -92,7 +96,9 @@ module memory_control (
     .pstrb_i    (4'b1111    ),
     .prdata_o   (dmem_data_o),
     .clk_i      (clk_i      ),
-    .rst_ni     (rst_ni     )
+    .rst_ni     (rst_ni     ),
+	.pslverr_o  (pslverr),
+	.pready_o   (pready)
     );
 
   // output peripheral control ------------------------------------------------------------------------------------
