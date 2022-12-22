@@ -1,20 +1,20 @@
 
 module ctrl_unit (
-    // ngo vao
-    input logic [31:0] inst_i,
-    input logic br_less_i,
-    br_equal_i,
-    // ngo ra
+    input  logic [31:0] inst_i,
+    input  logic br_less_i,
+    input  logic br_equal_i,
     output logic [3:0] ls_op_o,
     output logic [2:0] imm_sel_o,
     output logic br_sel_o,
     output logic br_unsigned_o,
     output logic rf_wren_o,
     output logic op_a_sel_o,
-    op_b_sel_o,
+    output logic op_b_sel_o,
     output logic [3:0] alu_op_o,
     output logic mem_wren_o,
-    output logic [1:0] wb_sel_o
+    output logic [1:0] wb_sel_o,
+    output logic alu_fpu_en_o,
+    output logic [1:0] fpu_op_o 
 );
 
   logic br_unsignedB, br_selB;
@@ -50,6 +50,8 @@ module ctrl_unit (
         br_unsigned_o = (alu_op_o == 4'h3) ? 1'b1 : 1'b0;
         br_sel_o      = 1'b0;  //pc+4
         ls_op_o       = 4'b0000;
+        alu_fpu_en_o  = 1'b0; // enable ALU
+        fpu_op_o = 2'b11; // dont care
 
       end
 
@@ -77,6 +79,8 @@ module ctrl_unit (
         br_unsigned_o = (alu_op_o == 4'h3) ? 1 : 0;
         br_sel_o      = 1'b0;  //pc+4
         ls_op_o       = 4'b0000;
+        alu_fpu_en_o  = 1'b0; // enable ALU
+        fpu_op_o = 2'b11; // dont care
       end
 
       // l : lw,lh,lb,lbu,lhu -----------------------------------------------------------------
@@ -99,6 +103,8 @@ module ctrl_unit (
         wb_sel_o      = 2'b01;  // choose ld_data
         br_sel_o      = 1'b0;  // pc+4  
         br_unsigned_o = 1'b0;  // don't care
+        alu_fpu_en_o  = 1'b0; // enable ALU
+        fpu_op_o = 2'b11; // dont care
       end
 
       // S : sw ,sh,sb -------------------------------------------------------------------------
@@ -119,6 +125,8 @@ module ctrl_unit (
         alu_op_o      = 4'h0;  // add
         mem_wren_o    = 1'b1;  // write to the LSU	
         wb_sel_o      = 2'b01;  // don't care 
+        alu_fpu_en_o  = 1'b0; // enable ALU
+        fpu_op_o = 2'b11; // dont care
       end
 
       // Type_B: beq.bne , blt,bltu,bge,bgeu ----------------------------------------------------
@@ -133,6 +141,8 @@ module ctrl_unit (
         br_unsigned_o = br_unsignedB;
         br_sel_o      = br_selB;
         ls_op_o       = 4'b0000;
+        alu_fpu_en_o  = 1'b0; // enable ALU
+        fpu_op_o = 2'b11; // dont care
       end
 
       // type_U auipc --------------------------------------------------------------------------
@@ -147,6 +157,8 @@ module ctrl_unit (
         mem_wren_o    = 1'b0;  //don't write to the LSU	
         wb_sel_o      = 2'b00;  //choose alu_data 
         ls_op_o       = 4'b0000;
+        alu_fpu_en_o  = 1'b0; // enable ALU
+        fpu_op_o = 2'b11; // dont care
       end
       // type_J : JAL--------------------------------------------------------------------------
       7'b1101111: begin
@@ -160,6 +172,8 @@ module ctrl_unit (
         mem_wren_o    = 1'b0;  //don't write to the LSU	
         wb_sel_o      = 2'b10;  //choose pc_four 
         ls_op_o       = 4'b0000;
+        alu_fpu_en_o  = 1'b0; // enable ALU
+        fpu_op_o = 2'b11; // dont care
       end
       // JALR ------------------------------------------------------------------------------------
       7'b1100111: begin
@@ -173,6 +187,8 @@ module ctrl_unit (
         mem_wren_o    = 1'b0;  //don't write to the LSU	
         wb_sel_o      = 2'b10;  //choose pc_four
         ls_op_o       = 4'b0000;
+        alu_fpu_en_o  = 1'b0; // enable ALU
+        fpu_op_o = 2'b11; // dont care
       end
       // type_U lui	------------------------------------------------------------------------------------	
       7'b0110111: begin
@@ -186,11 +202,32 @@ module ctrl_unit (
         mem_wren_o    = 1'b0;  //don't write to the LSU	
         wb_sel_o      = 2'b00;  //choose alu_data 
         ls_op_o       = 4'b0000;
+        alu_fpu_en_o  = 1'b0; // enable ALU
+        fpu_op_o = 2'b11; // dont care
       end
       //------------------------------------------------------------------------------------
+      7'b1010011: begin
+        if(inst_i[14:12] == 000) begin // FADDI , FADD
+          op_b_sel_o    = 1'b1;  // choose imm_i
+          fpu_op_o = 2'b00 ;     // Chose ADD in FPU
+        end else begin           
+          op_b_sel_o    = 1'b1; // chose reg2
+          fpu_op_o = (inst_i[27] == 1 )? 2'b01 : 2'b00 ;    // Chose SUB in FPU if inst[27] = 1
+        end
+        imm_sel_o     = 3'b101;  // F_tpye
+        rf_wren_o     = 1'b1;  // write to the regfile
+        op_a_sel_o    = 1'b0;  // choose rs1_data
+        mem_wren_o    = 1'b0;  //don't write LSU
+        wb_sel_o      = 2'b00;  // choose alu_data
+        br_unsigned_o = 1'b0;  // dont care
+        br_sel_o      = 1'b0;  //pc+4
+        ls_op_o       = 4'b0000;
+        alu_op_o      = 4'h0; // dont care
+        alu_fpu_en_o  = 1'b1; // enable FPU
+      end
       default: begin
         br_sel_o      = 1'b0;
-        imm_sel_o     = 3'b101;
+        imm_sel_o     = 3'b111; // default
         rf_wren_o     = 1'b0;
         br_unsigned_o = 1'b0;
         op_a_sel_o    = 1'b0;
@@ -199,6 +236,7 @@ module ctrl_unit (
         mem_wren_o    = 1'b0;
         wb_sel_o      = 2'b00;
         ls_op_o       = 4'd0;
+        alu_fpu_en_o  = 1'b0; // enable ALU
       end
     endcase
   end

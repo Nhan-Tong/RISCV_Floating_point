@@ -2,9 +2,10 @@ module ALU (
   // inputs
   input  logic [31:0] operand_a_i,
   input  logic [31:0] operand_b_i,
-  input  logic [3:0] alu_op_i,
+  input  logic [3:0]  alu_op_i,
+  input logic         alu_fpu_en_i,
   // outputs
-  output logic [31:0] alu_data_o	
+  output logic [31:0] alu_o	
  );
 
   // variables declaration -------------------------------------------------------------------------------------------
@@ -12,6 +13,7 @@ module ALU (
   logic [31:0] slt_tmp;
   logic [31:0] sltu_tmp;
   logic [31:0] srl_tmp;	
+  logic [31:0] alu_data_o;
   logic        L_u,L_s;
   /* verilator lint_off UNUSED */
   logic        br_not_used;
@@ -32,7 +34,7 @@ module ALU (
 	A_LUI	= 	4'hA	
   } alu_op_e;
   alu_op_e alu_op;
-
+  assign alu_o = (!alu_fpu_en_i)? alu_data_o : 32'h0;
   assign alu_op = alu_op_i;
   assign sltu_tmp = {31'b0,L_u} ;
   assign slt_tmp  = {31'b0,L_s} ;

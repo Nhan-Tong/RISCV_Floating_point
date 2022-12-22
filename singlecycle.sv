@@ -1,3 +1,4 @@
+  /* verilator lint_off UNUSED */
 module singlecycle (
     // inputs 
     input  logic        clk_i,
@@ -27,10 +28,13 @@ module singlecycle (
   logic [31:0] operand_a, operand_b;
   logic [31:0] imm;
   logic [31:0] mem_data;
+  logic [31:0] FPALU_data;
+  logic [31:0] fpu_data;
   logic [ 2:0] imm_sel;
   logic [ 3:0] alu_op; // alu option
   logic [ 1:0] wb_sel;
   logic [ 3:0] ls_op; // load store option
+  logic [ 1:0] fpu_op;
   logic        br_sel;
   logic        br_unsigned;
   logic        rf_wren;
@@ -38,6 +42,7 @@ module singlecycle (
   logic br_less;
   logic br_equal;
   logic mem_wren;
+  logic alu_fpu_en;
 
   //// module control unit-----------------------------------------------------------------------------check
   ctrl_unit ctrl_unit1 (
@@ -53,7 +58,9 @@ module singlecycle (
       .op_b_sel_o   (op_b_sel),
       .alu_op_o     (alu_op),
       .mem_wren_o   (mem_wren),
-      .wb_sel_o     (wb_sel)
+      .wb_sel_o     (wb_sel),
+      .alu_fpu_en_o (alu_fpu_en),
+      .fpu_op_o     (fpu_op)
   );
   ////////module pc unit------------------------------------------------------------------------------ check
   pc_unit pc_unit1 (
@@ -118,9 +125,25 @@ module singlecycle (
       .operand_a_i(operand_a),
       .operand_b_i(operand_b),
       .alu_op_i   (alu_op),
-      .alu_data_o (alu_data)
+      .alu_fpu_en_i (alu_fpu_en),
+      .alu_o (alu_data)
   );
-
+  // module FPU-------------------------------------------------------------------------------------------------check
+  fpu_top FPU1(
+    .clk_i(clk_i),
+    .op_a_i(operand_a),
+    .op_b_i(operand_b),
+    .fpu_op_i(fpu_op),
+    .alu_fpu_en_i(alu_fpu_en),
+    .fpu_data_o(fpu_data)
+  );
+  // module mux2_fpu_alu-------------------------------------------------------------------------------------------------check
+  mux2_fpu_alu muxalufpu(
+    .alu_i(alu_data),
+    .fpu_i(fpu_data),
+    .alu_fpu_en_i(alu_fpu_en),
+    .result_o(FPALU_data)
+  );
   // module memory control-------------------------------------------------------------------------------------------------?
   memory_control lsc1 (
       .clk_i    (clk_i),
@@ -147,7 +170,7 @@ module singlecycle (
   feedback_mux mux3to1 (
       .wb_sel_i  (wb_sel),
       .pc_four_i (pc + 32'd4),
-      .alu_data_i(alu_data),
+      .alu_data_i(FPALU_data),
       .mem_data_i (mem_data),
       .wb_data_o (wb_data)
   );
