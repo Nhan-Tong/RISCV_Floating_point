@@ -214,7 +214,7 @@ module ctrl_unit (
           op_b_sel_o    = 1'b1; // chose reg2
           fpu_op_o = (inst_i[27] == 1 )? 2'b01 : 2'b00 ;    // Chose SUB in FPU if inst[27] = 1
         end
-        imm_sel_o     = 3'b101;  // F_tpye
+        imm_sel_o     = 3'b110;  // F_tpye
         rf_wren_o     = 1'b1;  // write to the regfile
         op_a_sel_o    = 1'b0;  // choose rs1_data
         mem_wren_o    = 1'b0;  //don't write LSU

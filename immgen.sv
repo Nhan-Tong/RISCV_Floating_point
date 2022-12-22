@@ -22,7 +22,7 @@ module immgen (
       immgen_o = {{12{inst_i[31]}}, inst_i[19:12], inst_i[20], inst_i[30:21], 1'b0};  // J-type	
 
       3'b101: immgen_o = 0;  // R_type
-      3'b110: immgen_o = {inst_i[31],inst_i[30:26],3'b0,inst_i[25:20],17'h0}; // F_type
+      3'b110: immgen_o = {inst_i[31],({3'h0,inst_i[30:26]} + 8'd112),inst_i[25:20],17'h0}; // F_type
       default: immgen_o = inst_i;
     endcase
   end

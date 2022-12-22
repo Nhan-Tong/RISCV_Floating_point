@@ -8,7 +8,8 @@ module fpu_pre_norm (
   input  logic alu_fpu_en_i,
   output logic [32:0] pre_a_o,
   output logic [32:0] pre_b_o,
-  output logic [2:0]  exception_o
+  output logic [2:0]  exception_o,
+  output logic [31:0] exception_value
 );
  
   logic a_nan, b_nan, a_zero, b_zero, a_inf, b_inf;
@@ -28,35 +29,38 @@ module fpu_pre_norm (
   always_comb begin
     case (state)
       //If a is NaN or b is zero return a for add and sub
-      8'b01100100, 8'b00100100: begin 
-          exception_o = 3'h1;
-        pre_a_o = {op_a_i[31:23],  1'b1,  op_a_i[22:0] };
+      8'b01100100, 8'b00100100, 8'b00000100: begin 
+        exception_o = 3'h001;
+        pre_a_o = 0;
         pre_b_o = 0;
+        exception_value = op_a_i;
       end
       //If b is NaN or a is zero return b for add and sub
-      8'b01011000, 8'b00011000: begin 
-          exception_o = 3'h2;
-        pre_b_o = {op_b_i[31:23],  1'b1,  op_b_i[22:0] };
+      8'b01011000, 8'b00011000, 8'b00001000: begin 
+        exception_o = 3'b010;
+        pre_b_o = 0;
         pre_a_o = 0;
+        exception_value = op_b_i;
       end
       //if a or b is inf return inf
       8'b01000010, 8'b01000001, 8'b00000010, 8'b00000001 : begin 
-          exception_o = 3'h3;
-        pre_b_o = {op_b_i[31],  8'hFF,  1'b1,  23'h0};
-        pre_a_o = {op_a_i[31],  8'hFF,  1'b1,  23'h0};
+        exception_o = 3'b011;
+        pre_b_o = 0;
+        pre_a_o = 0;
+        exception_value = {(pre_b_o[31]^pre_a_o[31]),31'h3FFFFFFF};
       end
-      8'b01000000: begin // SUB
-          exception_o = 3'h0;
+      8'b01000000, 8'b01001000: begin // SUB
+          exception_o = 3'b000;
         pre_a_o = {op_a_i[31], op_a_i[30:23] ,  1'b1,  op_a_i[22:0] };
         pre_b_o = {~op_b_i[31], op_b_i[30:23] ,  1'b1,  op_b_i[22:0] };
       end
       8'b00000000: begin // ADD
-          exception_o = 3'h0;
+          exception_o = 3'b000;
         pre_a_o = {op_a_i[31], op_a_i[30:23] ,  1'b1,  op_a_i[22:0] };
         pre_b_o = {op_b_i[31], op_b_i[30:23] ,  1'b1,  op_b_i[22:0] };
       end
       default: begin // ERROR
-          exception_o = 3'h4;
+        exception_o = 3'b100;
         pre_a_o = 0;
         pre_b_o = 0;
       end

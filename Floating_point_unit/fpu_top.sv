@@ -12,8 +12,11 @@ module fpu_top (
 );
 
   logic [32:0] pre_a, pre_b;
-  logic exception;
+  logic [3:0]  exception;
   logic [33:0] add_result;
+  logic [31:0] exc_value,norm_value;
+  
+  assign fpu_data_o = (exception == 0)? norm_value : exc_value ;
 
   fpu_pre_norm prenorm (
   .clk_i(clk_i),
@@ -23,7 +26,8 @@ module fpu_top (
   .alu_fpu_en_i(alu_fpu_en_i),
   .pre_a_o(pre_a),
   .pre_b_o(pre_b),
-  .exception_o(exception)
+  .exception_o(exception),
+  .exception_value(exc_value)
   );
 
   fpu_add  addf (
@@ -34,9 +38,10 @@ module fpu_top (
     //.norm_en
   );
 
-  fpu_norm normf (
+  fpu_post_norm normf (
     .add_i(add_result),
-    .norm_o(fpu_data_o)
+    .exception_i(exception),
+    .norm_o(norm_value)
   );
 endmodule
 

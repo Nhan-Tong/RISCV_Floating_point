@@ -1,8 +1,9 @@
 /* verilator lint_off UNUSED */
 
 
-module fpu_norm (
+module fpu_post_norm (
     input logic [33:0] add_i,
+    input logic [3:0] exception_i,
     output logic [31:0] norm_o
 );
 
@@ -23,6 +24,7 @@ module fpu_norm (
     always_comb begin
       out_e = 0;
       out_m = 0;
+    if(exception_i == 0) begin
     if(add_i[24] == 1) begin
       out_m  = in_m >> 1;
       out_e  = in_e + 1;
@@ -92,6 +94,7 @@ module fpu_norm (
         out_m = in_m;
       end
     end
+  end
   end
 endmodule
 
