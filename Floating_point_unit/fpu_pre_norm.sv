@@ -1,3 +1,6 @@
+/* verilator lint_off UNUSED */
+/* verilator lint_off LATCH */
+
 module fpu_pre_norm (
   input  logic clk_i,
   input  logic [31:0] op_a_i, op_b_i,
@@ -27,30 +30,30 @@ module fpu_pre_norm (
       //If a is NaN or b is zero return a for add and sub
       8'b01100100, 8'b00100100: begin 
           exception_o = 3'h1;
-        pre_a_o = {op_a_i[31:23],  1'b,  op_a_i[22:0] };
+        pre_a_o = {op_a_i[31:23],  1'b1,  op_a_i[22:0] };
         pre_b_o = 0;
       end
       //If b is NaN or a is zero return b for add and sub
       8'b01011000, 8'b00011000: begin 
           exception_o = 3'h2;
-        pre_b_o = {op_b_i[31:23],  1'b,  op_b_i[22:0] };
+        pre_b_o = {op_b_i[31:23],  1'b1,  op_b_i[22:0] };
         pre_a_o = 0;
       end
       //if a or b is inf return inf
       8'b01000010, 8'b01000001, 8'b00000010, 8'b00000001 : begin 
           exception_o = 3'h3;
-        pre_b_o = {op_b_i[31],  8'hFF,  1'b,  23'h0};
-        pre_a_o = {op_a_i[31],  8'hFF,  1'b,  23'h0};
+        pre_b_o = {op_b_i[31],  8'hFF,  1'b1,  23'h0};
+        pre_a_o = {op_a_i[31],  8'hFF,  1'b1,  23'h0};
       end
       8'b01000000: begin // SUB
           exception_o = 3'h0;
-        pre_a_o = {op_a_i[31], op_a_i[30:23] ,  1'b,  op_a_i[22:0] };
-        pre_b_o = {~op_b_i[31], op_b_i[30:23] ,  1'b,  op_b_i[22:0] };
+        pre_a_o = {op_a_i[31], op_a_i[30:23] ,  1'b1,  op_a_i[22:0] };
+        pre_b_o = {~op_b_i[31], op_b_i[30:23] ,  1'b1,  op_b_i[22:0] };
       end
       8'b00000000: begin // ADD
           exception_o = 3'h0;
-        pre_a_o = {op_a_i[31], op_a_i[30:23] ,  1'b,  op_a_i[22:0] };
-        pre_b_o = {op_b_i[31], op_b_i[30:23] ,  1'b,  op_b_i[22:0] };
+        pre_a_o = {op_a_i[31], op_a_i[30:23] ,  1'b1,  op_a_i[22:0] };
+        pre_b_o = {op_b_i[31], op_b_i[30:23] ,  1'b1,  op_b_i[22:0] };
       end
       default: begin // ERROR
           exception_o = 3'h4;

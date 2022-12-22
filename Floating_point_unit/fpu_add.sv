@@ -1,3 +1,6 @@
+/* verilator lint_off WIDTH */
+
+
 module fpu_add (
     input logic [32:0] pre_a_i,
     input logic [32:0] pre_b_i,
@@ -29,6 +32,11 @@ module fpu_add (
   assign add_o = {o_sign, o_exp, o_man};
   
   always_comb begin 
+    o_exp  = 0;
+    o_sign = 0;
+    o_man  = 0;
+    diff   = 0;
+    tmp_mantissa = 0;
     if(exception_i == 0) begin
         if(a_exp == b_exp) begin // Equal exponents
         o_exp = a_exp;
@@ -47,7 +55,7 @@ module fpu_add (
         end else if(a_exp > b_exp) begin // unequal exponents
         o_exp = a_exp;
         o_sign = a_sign;
-        diff   = a_exponent + (~b_exponent +1);
+        diff   = a_exp + (~b_exp +1);
         tmp_mantissa = b_man >> diff;
         if(a_sign == b_sign) 
             o_man = a_man + tmp_mantissa;
@@ -56,7 +64,7 @@ module fpu_add (
         end else if (a_exp < b_exp) begin
         o_exp = b_exp;
         o_sign = b_sign;
-        diff   = b_exponent + (~a_exponent +1);
+        diff   = b_exp + (~a_exp +1);
         tmp_mantissa = a_man >> diff;
         if(a_sign == b_sign) 
             o_man = b_man + tmp_mantissa;
