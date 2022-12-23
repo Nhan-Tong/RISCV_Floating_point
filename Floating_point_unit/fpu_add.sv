@@ -11,7 +11,7 @@ module fpu_add (
   // pre_a,b = [[32]sign__[31:24]exp__1'b1__[22:0]frac]
   logic a_sign, b_sign;
   logic [7:0] a_exp , b_exp;
-  logic [23:0] a_man, b_man; // mantissa
+  logic [24:0] a_man, b_man; // mantissa
   
   logic [7:0] diff;
   logic [23:0] tmp_mantissa;
@@ -23,11 +23,11 @@ module fpu_add (
 
   assign a_sign = pre_a_i[32];
   assign a_exp  = (pre_a_i[31:24] != 0 )? pre_a_i[31:24]: 8'b00000001 ;
-  assign a_man  = pre_a_i[23:0];
+  assign a_man  = {1'b0,pre_a_i[23:0]};
   
   assign b_sign = pre_b_i[32];
   assign b_exp  = (pre_b_i[31:24] != 0 )? pre_b_i[31:24]: 8'b00000001 ;
-  assign b_man  = pre_b_i[23:0];
+  assign b_man  = {1'b0,pre_b_i[23:0]};
 
   assign add_o = {o_sign, o_exp, o_man};
   

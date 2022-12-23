@@ -207,11 +207,11 @@ module ctrl_unit (
       end
       //------------------------------------------------------------------------------------
       7'b1010011: begin
-        if(inst_i[14:12] == 000) begin // FADDI , FADD
+        if(inst_i[14:12] == 001) begin // FADDI , FADD
           op_b_sel_o    = 1'b1;  // choose imm_i
           fpu_op_o = 2'b00 ;     // Chose ADD in FPU
         end else begin           
-          op_b_sel_o    = 1'b1; // chose reg2
+          op_b_sel_o    = 1'b0; // chose reg2
           fpu_op_o = (inst_i[27] == 1 )? 2'b01 : 2'b00 ;    // Chose SUB in FPU if inst[27] = 1
         end
         imm_sel_o     = 3'b110;  // F_tpye
